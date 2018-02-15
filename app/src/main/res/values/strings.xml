@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">작업사항</string>
+    <string name="equipName">장 비</string>
+    <string name="equipCnt">대 수</string>
+    <string name="workDesc">금일 작업 사항</string>
+    <string name="workSite">현장명 : </string>
+    <string name="total">합  계</string>
+    <string name="worker_name">공 종</string>
+    <string name="worker_cnt">인 원</string>
+    <string name="banner_ad_unit_id">ca-app-pub-8039042765632689/4749346457</string>
+    <string name="need_permissions">화면 캡쳐를 위해 앱을 재실행하여 권한을 승인해주세요</string>
+</resources>
