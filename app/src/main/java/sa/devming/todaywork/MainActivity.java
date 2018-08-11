@@ -3,24 +3,23 @@ package sa.devming.todaywork;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.net.Uri;
-import android.os.Build;
+import android.graphics.Rect;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
@@ -41,63 +40,63 @@ public class MainActivity extends AppCompatActivity {
     private TextView equipCntSum, workerCntSum;
     private InputMethodManager imm;
 
+    private boolean isShare = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        workSiteET = (EditText)findViewById(R.id.workSiteET);
+        workSiteET = findViewById(R.id.workSiteET);
 
         //equipment
-        equipNameRow1 = (EditText)findViewById(R.id.equipNameRow1);
-        equipNameRow2 = (EditText)findViewById(R.id.equipNameRow2);
-        equipNameRow3 = (EditText)findViewById(R.id.equipNameRow3);
-        equipNameRow4 = (EditText)findViewById(R.id.equipNameRow4);
-        equipNameRow5 = (EditText)findViewById(R.id.equipNameRow5);
+        equipNameRow1 = findViewById(R.id.equipNameRow1);
+        equipNameRow2 = findViewById(R.id.equipNameRow2);
+        equipNameRow3 = findViewById(R.id.equipNameRow3);
+        equipNameRow4 = findViewById(R.id.equipNameRow4);
+        equipNameRow5 = findViewById(R.id.equipNameRow5);
 
-        equipDescRow1 = (EditText)findViewById(R.id.equipDescRow1);
-        equipDescRow2 = (EditText)findViewById(R.id.equipDescRow2);
-        equipDescRow3 = (EditText)findViewById(R.id.equipDescRow3);
-        equipDescRow4 = (EditText)findViewById(R.id.equipDescRow4);
-        equipDescRow5 = (EditText)findViewById(R.id.equipDescRow5);
+        equipDescRow1 = findViewById(R.id.equipDescRow1);
+        equipDescRow2 = findViewById(R.id.equipDescRow2);
+        equipDescRow3 = findViewById(R.id.equipDescRow3);
+        equipDescRow4 = findViewById(R.id.equipDescRow4);
+        equipDescRow5 = findViewById(R.id.equipDescRow5);
 
-        equipCntRow1 = (EditText)findViewById(R.id.equipCntRow1);
-        equipCntRow2 = (EditText)findViewById(R.id.equipCntRow2);
-        equipCntRow3 = (EditText)findViewById(R.id.equipCntRow3);
-        equipCntRow4 = (EditText)findViewById(R.id.equipCntRow4);
-        equipCntRow5 = (EditText)findViewById(R.id.equipCntRow5);
-        equipCntSum = (TextView)findViewById(R.id.equipCntSum);
+        equipCntRow1 = findViewById(R.id.equipCntRow1);
+        equipCntRow2 = findViewById(R.id.equipCntRow2);
+        equipCntRow3 = findViewById(R.id.equipCntRow3);
+        equipCntRow4 = findViewById(R.id.equipCntRow4);
+        equipCntRow5 = findViewById(R.id.equipCntRow5);
+        equipCntSum = findViewById(R.id.equipCntSum);
 
         //worker
-        workerNameRow1 = (EditText)findViewById(R.id.workerNameRow1);
-        workerNameRow2 = (EditText)findViewById(R.id.workerNameRow2);
-        workerNameRow3 = (EditText)findViewById(R.id.workerNameRow3);
-        workerNameRow4 = (EditText)findViewById(R.id.workerNameRow4);
-        workerNameRow5 = (EditText)findViewById(R.id.workerNameRow5);
-        workerNameRow6 = (EditText)findViewById(R.id.workerNameRow6);
+        workerNameRow1 = findViewById(R.id.workerNameRow1);
+        workerNameRow2 = findViewById(R.id.workerNameRow2);
+        workerNameRow3 = findViewById(R.id.workerNameRow3);
+        workerNameRow4 = findViewById(R.id.workerNameRow4);
+        workerNameRow5 = findViewById(R.id.workerNameRow5);
+        workerNameRow6 = findViewById(R.id.workerNameRow6);
 
-        workerDescRow1 = (EditText)findViewById(R.id.workerDescRow1);
-        workerDescRow2 = (EditText)findViewById(R.id.workerDescRow2);
-        workerDescRow3 = (EditText)findViewById(R.id.workerDescRow3);
-        workerDescRow4 = (EditText)findViewById(R.id.workerDescRow4);
-        workerDescRow5 = (EditText)findViewById(R.id.workerDescRow5);
-        workerDescRow6 = (EditText)findViewById(R.id.workerDescRow6);
+        workerDescRow1 = findViewById(R.id.workerDescRow1);
+        workerDescRow2 = findViewById(R.id.workerDescRow2);
+        workerDescRow3 = findViewById(R.id.workerDescRow3);
+        workerDescRow4 = findViewById(R.id.workerDescRow4);
+        workerDescRow5 = findViewById(R.id.workerDescRow5);
+        workerDescRow6 = findViewById(R.id.workerDescRow6);
 
-        workerCntRow1 = (EditText)findViewById(R.id.workerCntRow1);
-        workerCntRow2 = (EditText)findViewById(R.id.workerCntRow2);
-        workerCntRow3 = (EditText)findViewById(R.id.workerCntRow3);
-        workerCntRow4 = (EditText)findViewById(R.id.workerCntRow4);
-        workerCntRow5 = (EditText)findViewById(R.id.workerCntRow5);
-        workerCntRow6 = (EditText)findViewById(R.id.workerCntRow6);
-        workerCntSum = (TextView)findViewById(R.id.workerCntSum);
+        workerCntRow1 = findViewById(R.id.workerCntRow1);
+        workerCntRow2 = findViewById(R.id.workerCntRow2);
+        workerCntRow3 = findViewById(R.id.workerCntRow3);
+        workerCntRow4 = findViewById(R.id.workerCntRow4);
+        workerCntRow5 = findViewById(R.id.workerCntRow5);
+        workerCntRow6 = findViewById(R.id.workerCntRow6);
+        workerCntSum = findViewById(R.id.workerCntSum);
 
         imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
 
-        if (Build.VERSION.SDK_INT >= 23) {
-            checkAllowPermissions();
-        }
         adMob();
         sumWorkCount();
+        //setListenerToRootView();
     }
 
     @Override
@@ -106,8 +105,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickShareBT(View v){
-        imm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        takeScreenshot();
+        imm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+        checkAllowPermissions();
+    }
+
+    private void setListenerToRootView() {
+        final View activityRootView = getWindow().getDecorView().findViewById(R.id.activity_main);
+        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                Rect r = new Rect();
+                activityRootView.getWindowVisibleDisplayFrame(r);
+                int heightDiff = activityRootView.getRootView().getHeight() - (r.bottom - r.top);
+                if (heightDiff > 100) {
+                    // keyboard open
+                    isShare = false;
+                } else {
+                    // keyboard close
+                    if (isShare) {
+                        isShare = false;
+                        checkAllowPermissions();
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -219,7 +240,6 @@ public class MainActivity extends AppCompatActivity {
 
             shareImage(imageFile);
         } catch (Throwable e){
-            Toast.makeText(this,getResources().getText(R.string.need_permissions),Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
     }
@@ -228,7 +248,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
         intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
+        //intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
+        intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(getApplicationContext(), "sa.devming.todaywork.fileprovider", imageFile));
 
         Intent chooser = Intent.createChooser(intent, "");
         chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -236,42 +257,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkAllowPermissions() {
-        String [] permissions = {android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-        int permissionCheck = PackageManager.PERMISSION_GRANTED;
-        for (int i = 0 ; i < permissions.length ; i++) {
-            permissionCheck = ContextCompat.checkSelfPermission(this, permissions[i]);
-            if (permissionCheck == PackageManager.PERMISSION_DENIED){
-                break;
-            }
-        }
-
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
-                ActivityCompat.requestPermissions(this, permissions, 1);
-            } else {
-                ActivityCompat.requestPermissions(this, permissions, 1);
-            }
+        if (PermissionUtil.checkPermissions(this, PermissionUtil.PERMISSIONS[0])
+                && PermissionUtil.checkPermissions(this, PermissionUtil.PERMISSIONS[1])) {
+            takeScreenshot();
+        } else {
+            PermissionUtil.requestExternalPermissions(this);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        /*if (requestCode == 1){
-            for (int i = 0 ; i < permissions.length ; i++){
-                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, permissions[i] + " 권한 승인", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(this, permissions[i] + "권한 승인되지 않음", Toast.LENGTH_LONG).show();
-                }
+        if (requestCode == PermissionUtil.REQUEST_CODE) {
+            if (PermissionUtil.verifyPermission(grantResults)) {
+                takeScreenshot();
+            } else {
+                Toast.makeText(this,getResources().getText(R.string.need_permissions),Toast.LENGTH_LONG).show();
             }
-        }*/
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     private void adMob(){
-        AdView mAdView = (AdView)findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
+        AdView mAdView = findViewById(R.id.adView);
+        Bundle extras = new Bundle();
+        extras.putString("max_ad_content_rating", "G");
+        AdRequest adRequest = new AdRequest.Builder()
+                .addNetworkExtrasBundle(AdMobAdapter.class, extras)
+                .build();
         mAdView.loadAd(adRequest);
     }
 

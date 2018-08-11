@@ -32,12 +32,13 @@
             android:inputType="text"
             android:maxLength="50"
             android:id="@+id/workSiteET" />
+
         <ImageButton
-            android:layout_width="45dp"
-            android:layout_height="45dp"
+            android:id="@+id/shareBT"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:background="@drawable/capture_share"
-            android:onClick="onClickShareBT"
-            android:id="@+id/shareBT"/>
+            android:onClick="onClickShareBT" />
     </LinearLayout>
     <ScrollView
         android:layout_width="match_parent"

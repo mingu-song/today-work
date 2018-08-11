@@ -8,5 +8,5 @@
     <string name="worker_name">공 종</string>
     <string name="worker_cnt">인 원</string>
     <string name="banner_ad_unit_id">ca-app-pub-8039042765632689/4749346457</string>
-    <string name="need_permissions">화면 캡쳐를 위해 앱을 재실행하여 권한을 승인해주세요</string>
+    <string name="need_permissions">화면 캡쳐를 위해 권한을 승인해주세요</string>
 </resources>
