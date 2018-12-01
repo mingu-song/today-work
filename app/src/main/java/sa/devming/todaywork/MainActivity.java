@@ -5,17 +5,21 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.GridLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,18 +33,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AboutRowDialog.AboutRowDialogListener {
     private EditText workSiteET;
     private EditText equipNameRow1, equipNameRow2, equipNameRow3, equipNameRow4, equipNameRow5;
     private EditText equipDescRow1, equipDescRow2, equipDescRow3, equipDescRow4, equipDescRow5;
     private EditText equipCntRow1, equipCntRow2, equipCntRow3, equipCntRow4, equipCntRow5;
-    private EditText workerNameRow1, workerNameRow2, workerNameRow3, workerNameRow4, workerNameRow5, workerNameRow6;
-    private EditText workerDescRow1, workerDescRow2, workerDescRow3, workerDescRow4, workerDescRow5, workerDescRow6;
-    private EditText workerCntRow1, workerCntRow2, workerCntRow3, workerCntRow4, workerCntRow5, workerCntRow6;
+    private EditText workerNameRow1, workerNameRow2, workerNameRow3, workerNameRow4, workerNameRow5;
+    private EditText workerDescRow1, workerDescRow2, workerDescRow3, workerDescRow4, workerDescRow5;
+    private EditText workerCntRow1, workerCntRow2, workerCntRow3, workerCntRow4, workerCntRow5;
     private TextView equipCntSum, workerCntSum;
-    private InputMethodManager imm;
-
-    private boolean isShare = false;
+    private View mainLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         equipCntRow3 = findViewById(R.id.equipCntRow3);
         equipCntRow4 = findViewById(R.id.equipCntRow4);
         equipCntRow5 = findViewById(R.id.equipCntRow5);
+
         equipCntSum = findViewById(R.id.equipCntSum);
 
         //worker
@@ -75,28 +78,38 @@ public class MainActivity extends AppCompatActivity {
         workerNameRow3 = findViewById(R.id.workerNameRow3);
         workerNameRow4 = findViewById(R.id.workerNameRow4);
         workerNameRow5 = findViewById(R.id.workerNameRow5);
-        workerNameRow6 = findViewById(R.id.workerNameRow6);
 
         workerDescRow1 = findViewById(R.id.workerDescRow1);
         workerDescRow2 = findViewById(R.id.workerDescRow2);
         workerDescRow3 = findViewById(R.id.workerDescRow3);
         workerDescRow4 = findViewById(R.id.workerDescRow4);
         workerDescRow5 = findViewById(R.id.workerDescRow5);
-        workerDescRow6 = findViewById(R.id.workerDescRow6);
 
         workerCntRow1 = findViewById(R.id.workerCntRow1);
         workerCntRow2 = findViewById(R.id.workerCntRow2);
         workerCntRow3 = findViewById(R.id.workerCntRow3);
         workerCntRow4 = findViewById(R.id.workerCntRow4);
         workerCntRow5 = findViewById(R.id.workerCntRow5);
-        workerCntRow6 = findViewById(R.id.workerCntRow6);
+
         workerCntSum = findViewById(R.id.workerCntSum);
 
-        imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+        mainLayout = findViewById(R.id.mainLayout);
 
         adMob();
         sumWorkCount();
-        //setListenerToRootView();
+    }
+
+    private void sumWorkCount(){
+        addTextChangeListener(equipCntRow1,AboutRowDialog.ChangeList.ADD_EQUIP);
+        addTextChangeListener(equipCntRow2,AboutRowDialog.ChangeList.ADD_EQUIP);
+        addTextChangeListener(equipCntRow3,AboutRowDialog.ChangeList.ADD_EQUIP);
+        addTextChangeListener(equipCntRow4,AboutRowDialog.ChangeList.ADD_EQUIP);
+        addTextChangeListener(equipCntRow5,AboutRowDialog.ChangeList.ADD_EQUIP);
+        addTextChangeListener(workerCntRow1,AboutRowDialog.ChangeList.ADD_WORKER);
+        addTextChangeListener(workerCntRow2,AboutRowDialog.ChangeList.ADD_WORKER);
+        addTextChangeListener(workerCntRow3,AboutRowDialog.ChangeList.ADD_WORKER);
+        addTextChangeListener(workerCntRow4,AboutRowDialog.ChangeList.ADD_WORKER);
+        addTextChangeListener(workerCntRow5,AboutRowDialog.ChangeList.ADD_WORKER);
     }
 
     @Override
@@ -105,30 +118,82 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickShareBT(View v){
-        imm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
         checkAllowPermissions();
     }
 
-    private void setListenerToRootView() {
-        final View activityRootView = getWindow().getDecorView().findViewById(R.id.activity_main);
-        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                Rect r = new Rect();
-                activityRootView.getWindowVisibleDisplayFrame(r);
-                int heightDiff = activityRootView.getRootView().getHeight() - (r.bottom - r.top);
-                if (heightDiff > 100) {
-                    // keyboard open
-                    isShare = false;
-                } else {
-                    // keyboard close
-                    if (isShare) {
-                        isShare = false;
-                        checkAllowPermissions();
+    public void onClickEditBT(View v) {
+        DialogFragment dialog = new AboutRowDialog();
+        dialog.show(getSupportFragmentManager(), "AboutRowDialog");
+    }
+
+    @Override
+    public void onSelected(AboutRowDialog.ChangeList selected) {
+        if (AboutRowDialog.ChangeList.ADD_EQUIP == selected) {
+            LinearLayout equipForm = findViewById(R.id.equipForm);
+            GridLayout newView = (GridLayout)getLayoutInflater().inflate(R.layout.add_equip_row, null);
+            equipForm.addView(newView);
+            addTextChangeListener(newView.findViewById(R.id.addEquipCnt), selected);
+        } else if (AboutRowDialog.ChangeList.DEL_EQUIP == selected) {
+            LinearLayout equipForm = findViewById(R.id.equipForm);
+            int cnt = equipForm.getChildCount();
+            if (cnt > 0) {
+                View view = equipForm.getChildAt(cnt - 1);
+                ((EditText)view.findViewById(R.id.addEquipCnt)).setText("0");
+                equipForm.removeView(view);
+            } else {
+                Toast.makeText(this, getString(R.string.no_more_del), Toast.LENGTH_SHORT).show();
+            }
+        } else if (AboutRowDialog.ChangeList.ADD_WORKER == selected) {
+            LinearLayout workerForm = findViewById(R.id.workerForm);
+            GridLayout newView = (GridLayout)getLayoutInflater().inflate(R.layout.add_worker_row, null);
+            workerForm.addView(newView);
+            addTextChangeListener(newView.findViewById(R.id.addWorkerCnt), selected);
+        } else if (AboutRowDialog.ChangeList.DEL_WORKER == selected) {
+            LinearLayout workerForm = findViewById(R.id.workerForm);
+            int cnt = workerForm.getChildCount();
+            if (cnt > 0) {
+                View view = workerForm.getChildAt(cnt - 1);
+                ((EditText)view.findViewById(R.id.addWorkerCnt)).setText("0");
+                workerForm.removeView(view);
+            } else {
+                Toast.makeText(this, getString(R.string.no_more_del), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void addTextChangeListener(View view, final AboutRowDialog.ChangeList selected) {
+        if (view instanceof EditText) {
+            EditText cnt = (EditText)view;
+            cnt.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    if (charSequence.length() > 0) {
+                        if (AboutRowDialog.ChangeList.ADD_EQUIP == selected) {
+                            int sum = Integer.parseInt(equipCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
+                            equipCntSum.setText(String.valueOf(sum));
+                        } else if (AboutRowDialog.ChangeList.ADD_WORKER == selected) {
+                            int sum = Integer.parseInt(workerCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
+                            workerCntSum.setText(String.valueOf(sum));
+                        }
                     }
                 }
-            }
-        });
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                }
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    if (editable.length() > 0) {
+                        if (AboutRowDialog.ChangeList.ADD_EQUIP == selected) {
+                            int sum = Integer.parseInt(equipCntSum.getText().toString()) + Integer.parseInt(editable.toString());
+                            equipCntSum.setText(String.valueOf(sum));
+                        } else if (AboutRowDialog.ChangeList.ADD_WORKER == selected) {
+                            int sum = Integer.parseInt(workerCntSum.getText().toString()) + Integer.parseInt(editable.toString());
+                            workerCntSum.setText(String.valueOf(sum));
+                        }
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -160,20 +225,17 @@ public class MainActivity extends AppCompatActivity {
         editor.putString("workerNameRow3", workerNameRow3.getText().toString());
         editor.putString("workerNameRow4", workerNameRow4.getText().toString());
         editor.putString("workerNameRow5", workerNameRow5.getText().toString());
-        editor.putString("workerNameRow6", workerNameRow6.getText().toString());
         editor.putString("workerDescRow1", workerDescRow1.getText().toString());
         editor.putString("workerDescRow2", workerDescRow2.getText().toString());
         editor.putString("workerDescRow3", workerDescRow3.getText().toString());
         editor.putString("workerDescRow4", workerDescRow4.getText().toString());
         editor.putString("workerDescRow5", workerDescRow5.getText().toString());
-        editor.putString("workerDescRow6", workerDescRow6.getText().toString());
         editor.putString("workerCntRow1", workerCntRow1.getText().toString());
         editor.putString("workerCntRow2", workerCntRow2.getText().toString());
         editor.putString("workerCntRow3", workerCntRow3.getText().toString());
         editor.putString("workerCntRow4", workerCntRow4.getText().toString());
         editor.putString("workerCntRow5", workerCntRow5.getText().toString());
-        editor.putString("workerCntRow6", workerCntRow6.getText().toString());
-        editor.commit();
+        editor.apply();
     }
 
     @Override
@@ -204,26 +266,37 @@ public class MainActivity extends AppCompatActivity {
         workerNameRow3.setText(preferences.getString("workerNameRow3",""));
         workerNameRow4.setText(preferences.getString("workerNameRow4",""));
         workerNameRow5.setText(preferences.getString("workerNameRow5",""));
-        workerNameRow6.setText(preferences.getString("workerNameRow6",""));
         workerDescRow1.setText(preferences.getString("workerDescRow1",""));
         workerDescRow2.setText(preferences.getString("workerDescRow2",""));
         workerDescRow3.setText(preferences.getString("workerDescRow3",""));
         workerDescRow4.setText(preferences.getString("workerDescRow4",""));
         workerDescRow5.setText(preferences.getString("workerDescRow5",""));
-        workerDescRow6.setText(preferences.getString("workerDescRow6",""));
         workerCntRow1.setText(preferences.getString("workerCntRow1",""));
         workerCntRow2.setText(preferences.getString("workerCntRow2",""));
         workerCntRow3.setText(preferences.getString("workerCntRow3",""));
         workerCntRow4.setText(preferences.getString("workerCntRow4",""));
         workerCntRow5.setText(preferences.getString("workerCntRow5",""));
-        workerCntRow6.setText(preferences.getString("workerCntRow6",""));
+    }
+
+    private Bitmap getBitmapFromScrollView() {
+        Bitmap bitmap = Bitmap.createBitmap(mainLayout.getWidth(), mainLayout.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Drawable bgDrawable = mainLayout.getBackground();
+        if (bgDrawable != null)
+            bgDrawable.draw(canvas);
+        else
+            canvas.drawColor(Color.WHITE);
+
+        mainLayout.draw(canvas);
+        return bitmap;
     }
 
     private void takeScreenshot(){
         try{
             View root = getWindow().getDecorView().getRootView();
             root.setDrawingCacheEnabled(true);
-            Bitmap bitmap = Bitmap.createBitmap(root.getDrawingCache());
+//            Bitmap bitmap = Bitmap.createBitmap(root.getDrawingCache());
+            Bitmap bitmap = getBitmapFromScrollView();
             root.setDrawingCacheEnabled(false);
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_kk:mm:ss", Locale.KOREA);
@@ -266,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.REQUEST_CODE) {
             if (PermissionUtil.verifyPermission(grantResults)) {
                 takeScreenshot();
@@ -278,7 +351,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void adMob(){
+    private void adMob() {
         AdView mAdView = findViewById(R.id.adView);
         Bundle extras = new Bundle();
         extras.putString("max_ad_content_rating", "G");
@@ -286,227 +359,5 @@ public class MainActivity extends AppCompatActivity {
                 .addNetworkExtrasBundle(AdMobAdapter.class, extras)
                 .build();
         mAdView.loadAd(adRequest);
-    }
-
-    private void sumWorkCount(){
-        equipCntRow1.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    int sum = Integer.parseInt(equipCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
-                    equipCntSum.setText(String.valueOf(sum));
-                }
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0) {
-                    int sum = Integer.parseInt(equipCntSum.getText().toString()) + Integer.parseInt(editable.toString());
-                    equipCntSum.setText(String.valueOf(sum));
-                }
-            }
-        });
-
-        equipCntRow2.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    int sum = Integer.parseInt(equipCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
-                    equipCntSum.setText(String.valueOf(sum));
-                }
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0) {
-                    int sum = Integer.parseInt(equipCntSum.getText().toString()) + Integer.parseInt(editable.toString());
-                    equipCntSum.setText(String.valueOf(sum));
-                }
-            }
-        });
-
-        equipCntRow3.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    int sum = Integer.parseInt(equipCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
-                    equipCntSum.setText(String.valueOf(sum));
-                }
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0) {
-                    int sum = Integer.parseInt(equipCntSum.getText().toString()) + Integer.parseInt(editable.toString());
-                    equipCntSum.setText(String.valueOf(sum));
-                }
-            }
-        });
-
-        equipCntRow4.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    int sum = Integer.parseInt(equipCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
-                    equipCntSum.setText(String.valueOf(sum));
-                }
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0) {
-                    int sum = Integer.parseInt(equipCntSum.getText().toString()) + Integer.parseInt(editable.toString());
-                    equipCntSum.setText(String.valueOf(sum));
-                }
-            }
-        });
-
-        equipCntRow5.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    int sum = Integer.parseInt(equipCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
-                    equipCntSum.setText(String.valueOf(sum));
-                }
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0) {
-                    int sum = Integer.parseInt(equipCntSum.getText().toString()) + Integer.parseInt(editable.toString());
-                    equipCntSum.setText(String.valueOf(sum));
-                }
-            }
-        });
-
-        workerCntRow1.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) + Integer.parseInt(editable.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-        });
-
-        workerCntRow2.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) + Integer.parseInt(editable.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-        });
-
-        workerCntRow3.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) + Integer.parseInt(editable.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-        });
-
-        workerCntRow4.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) + Integer.parseInt(editable.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-        });
-
-        workerCntRow5.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) + Integer.parseInt(editable.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-        });
-
-        workerCntRow6.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) - Integer.parseInt(charSequence.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0) {
-                    int sum = Integer.parseInt(workerCntSum.getText().toString()) + Integer.parseInt(editable.toString());
-                    workerCntSum.setText(String.valueOf(sum));
-                }
-            }
-        });
     }
 }

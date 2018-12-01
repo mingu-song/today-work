@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:columnCount="3">
+    <EditText
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/edit_padding"
+        android:paddingRight="@dimen/edit_padding"
+        android:layout_columnWeight="2"
+        android:maxLines="1"
+        android:inputType="text"
+        android:maxLength="10"
+        android:id="@+id/addEquipName"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:background="@drawable/content_border"/>
+    <EditText
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/edit_padding"
+        android:paddingRight="@dimen/edit_padding"
+        android:layout_columnWeight="1"
+        android:maxLines="1"
+        android:maxLength="4"
+        android:inputType="number"
+        android:id="@+id/addEquipCnt"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:background="@drawable/content_border"
+        android:gravity="center_vertical|right" />
+    <EditText
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/edit_padding"
+        android:paddingRight="@dimen/edit_padding"
+        android:layout_columnWeight="4"
+        android:maxLines="1"
+        android:inputType="text"
+        android:maxLength="30"
+        android:id="@+id/addEquipDesc"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:background="@drawable/content_border"/>
+</GridLayout>
