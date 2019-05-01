@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -158,6 +160,21 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
             } else {
                 Toast.makeText(this, getString(R.string.no_more_del), Toast.LENGTH_SHORT).show();
             }
+        } else if (AboutRowDialog.ChangeList.DEL_ALL == selected) {
+            ViewGroup vg = findViewById(R.id.activity_main);
+            clearForm(vg);
+        }
+    }
+
+    private void clearForm(ViewGroup group) {
+        for (int i = 0, count = group.getChildCount(); i < count; ++i) {
+            View view = group.getChildAt(i);
+            if (view instanceof EditText) {
+                ((EditText)view).setText("");
+            }
+
+            if (view instanceof ViewGroup && (((ViewGroup)view).getChildCount() > 0))
+                clearForm((ViewGroup)view);
         }
     }
 
@@ -352,11 +369,13 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
     }
 
     private void adMob() {
+        MobileAds.initialize(this, getString(R.string.admob_app_id));
         AdView mAdView = findViewById(R.id.adView);
         Bundle extras = new Bundle();
         extras.putString("max_ad_content_rating", "G");
         AdRequest adRequest = new AdRequest.Builder()
                 .addNetworkExtrasBundle(AdMobAdapter.class, extras)
+//                .addTestDevice("71D328C14DFC957F175AEAA313DFC22A")
                 .build();
         mAdView.loadAd(adRequest);
     }

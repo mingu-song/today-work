@@ -11,6 +11,7 @@
     <string name="add_worker_row">공종 추가</string>
     <string name="del_equip_row">장비 삭제</string>
     <string name="del_worker_row">공종 삭제</string>
+    <string name="del_all">전체 삭제</string>
     <string name="banner_ad_unit_id">ca-app-pub-8039042765632689/4749346457</string>
     <string name="admob_app_id">ca-app-pub-8039042765632689~3272613251</string>
     <string name="need_permissions">화면 캡쳐를 위해 권한을 승인해주세요</string>

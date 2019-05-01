@@ -10,7 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.widget.ArrayAdapter;
 
 public class AboutRowDialog extends DialogFragment {
-    public enum ChangeList { ADD_EQUIP, DEL_EQUIP, ADD_WORKER, DEL_WORKER}
+    public enum ChangeList { ADD_EQUIP, DEL_EQUIP, ADD_WORKER, DEL_WORKER, DEL_ALL}
     public interface AboutRowDialogListener {
         void onSelected(ChangeList selected);
     }
@@ -38,6 +38,7 @@ public class AboutRowDialog extends DialogFragment {
         arrayAdapter.add(getString(R.string.del_equip_row));
         arrayAdapter.add(getString(R.string.add_worker_row));
         arrayAdapter.add(getString(R.string.del_worker_row));
+        arrayAdapter.add(getString(R.string.del_all));
 
         builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
             @Override
@@ -54,6 +55,9 @@ public class AboutRowDialog extends DialogFragment {
                         break;
                     case 3:
                         listener.onSelected(ChangeList.DEL_WORKER);
+                        break;
+                    case 4:
+                        listener.onSelected(ChangeList.DEL_ALL);
                         break;
                 }
             }
