@@ -36,15 +36,16 @@ import java.util.Date;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements AboutRowDialog.AboutRowDialogListener {
-    private EditText workSiteET;
-    private EditText equipNameRow1, equipNameRow2, equipNameRow3, equipNameRow4, equipNameRow5;
-    private EditText equipDescRow1, equipDescRow2, equipDescRow3, equipDescRow4, equipDescRow5;
+    private EditText workSiteET, descET;
     private EditText equipCntRow1, equipCntRow2, equipCntRow3, equipCntRow4, equipCntRow5;
-    private EditText workerNameRow1, workerNameRow2, workerNameRow3, workerNameRow4, workerNameRow5;
-    private EditText workerDescRow1, workerDescRow2, workerDescRow3, workerDescRow4, workerDescRow5;
     private EditText workerCntRow1, workerCntRow2, workerCntRow3, workerCntRow4, workerCntRow5;
     private TextView equipCntSum, workerCntSum;
     private View mainLayout;
+
+    private int addEquipCnt = 0;
+    private int addWorkerCnt = 0;
+
+    private int recoverIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,20 +53,9 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
         setContentView(R.layout.activity_main);
 
         workSiteET = findViewById(R.id.workSiteET);
+        descET = findViewById(R.id.descET);
 
-        //equipment
-        equipNameRow1 = findViewById(R.id.equipNameRow1);
-        equipNameRow2 = findViewById(R.id.equipNameRow2);
-        equipNameRow3 = findViewById(R.id.equipNameRow3);
-        equipNameRow4 = findViewById(R.id.equipNameRow4);
-        equipNameRow5 = findViewById(R.id.equipNameRow5);
-
-        equipDescRow1 = findViewById(R.id.equipDescRow1);
-        equipDescRow2 = findViewById(R.id.equipDescRow2);
-        equipDescRow3 = findViewById(R.id.equipDescRow3);
-        equipDescRow4 = findViewById(R.id.equipDescRow4);
-        equipDescRow5 = findViewById(R.id.equipDescRow5);
-
+        //equip
         equipCntRow1 = findViewById(R.id.equipCntRow1);
         equipCntRow2 = findViewById(R.id.equipCntRow2);
         equipCntRow3 = findViewById(R.id.equipCntRow3);
@@ -75,18 +65,6 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
         equipCntSum = findViewById(R.id.equipCntSum);
 
         //worker
-        workerNameRow1 = findViewById(R.id.workerNameRow1);
-        workerNameRow2 = findViewById(R.id.workerNameRow2);
-        workerNameRow3 = findViewById(R.id.workerNameRow3);
-        workerNameRow4 = findViewById(R.id.workerNameRow4);
-        workerNameRow5 = findViewById(R.id.workerNameRow5);
-
-        workerDescRow1 = findViewById(R.id.workerDescRow1);
-        workerDescRow2 = findViewById(R.id.workerDescRow2);
-        workerDescRow3 = findViewById(R.id.workerDescRow3);
-        workerDescRow4 = findViewById(R.id.workerDescRow4);
-        workerDescRow5 = findViewById(R.id.workerDescRow5);
-
         workerCntRow1 = findViewById(R.id.workerCntRow1);
         workerCntRow2 = findViewById(R.id.workerCntRow2);
         workerCntRow3 = findViewById(R.id.workerCntRow3);
@@ -135,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
             GridLayout newView = (GridLayout)getLayoutInflater().inflate(R.layout.add_equip_row, null);
             equipForm.addView(newView);
             addTextChangeListener(newView.findViewById(R.id.addEquipCnt), selected);
+            addEquipCnt++;
         } else if (AboutRowDialog.ChangeList.DEL_EQUIP == selected) {
             LinearLayout equipForm = findViewById(R.id.equipForm);
             int cnt = equipForm.getChildCount();
@@ -142,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
                 View view = equipForm.getChildAt(cnt - 1);
                 ((EditText)view.findViewById(R.id.addEquipCnt)).setText("0");
                 equipForm.removeView(view);
+                addEquipCnt--;
             } else {
                 Toast.makeText(this, getString(R.string.no_more_del), Toast.LENGTH_SHORT).show();
             }
@@ -150,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
             GridLayout newView = (GridLayout)getLayoutInflater().inflate(R.layout.add_worker_row, null);
             workerForm.addView(newView);
             addTextChangeListener(newView.findViewById(R.id.addWorkerCnt), selected);
+            addWorkerCnt++;
         } else if (AboutRowDialog.ChangeList.DEL_WORKER == selected) {
             LinearLayout workerForm = findViewById(R.id.workerForm);
             int cnt = workerForm.getChildCount();
@@ -157,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
                 View view = workerForm.getChildAt(cnt - 1);
                 ((EditText)view.findViewById(R.id.addWorkerCnt)).setText("0");
                 workerForm.removeView(view);
+                addWorkerCnt--;
             } else {
                 Toast.makeText(this, getString(R.string.no_more_del), Toast.LENGTH_SHORT).show();
             }
@@ -213,6 +195,23 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
         }
     }
 
+    private void getAllText(ViewGroup vg, StringBuilder sb) {
+        for (int i = 0, count = vg.getChildCount(); i < count; ++i) {
+            View view = vg.getChildAt(i);
+            if (view instanceof EditText) {
+                String et = ((EditText)view).getText().toString();
+                if (et != null && et.length() > 0)
+                    sb.append(et).append("|");
+                else
+                    sb.append("@|");
+            }
+
+            if (view instanceof ViewGroup && (((ViewGroup)view).getChildCount() > 0)) {
+                getAllText((ViewGroup) view, sb);
+            }
+        }
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -220,39 +219,42 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
         SharedPreferences.Editor editor = preferences.edit();
 
         editor.putString("workSiteET", workSiteET.getText().toString());
+        editor.putString("descET", descET.getText().toString());
+        editor.putString("addEquipCnt", addEquipCnt+"");
+        editor.putString("addWorkerCnt", addWorkerCnt+"");
 
-        editor.putString("equipNameRow1", equipNameRow1.getText().toString());
-        editor.putString("equipNameRow2", equipNameRow2.getText().toString());
-        editor.putString("equipNameRow3", equipNameRow3.getText().toString());
-        editor.putString("equipNameRow4", equipNameRow4.getText().toString());
-        editor.putString("equipNameRow5", equipNameRow5.getText().toString());
-        editor.putString("equipDescRow1", equipDescRow1.getText().toString());
-        editor.putString("equipDescRow2", equipDescRow2.getText().toString());
-        editor.putString("equipDescRow3", equipDescRow3.getText().toString());
-        editor.putString("equipDescRow4", equipDescRow4.getText().toString());
-        editor.putString("equipDescRow5", equipDescRow5.getText().toString());
-        editor.putString("equipCntRow1", equipCntRow1.getText().toString());
-        editor.putString("equipCntRow2", equipCntRow2.getText().toString());
-        editor.putString("equipCntRow3", equipCntRow3.getText().toString());
-        editor.putString("equipCntRow4", equipCntRow4.getText().toString());
-        editor.putString("equipCntRow5", equipCntRow5.getText().toString());
+        StringBuilder mainGrid = new StringBuilder();
+        ViewGroup mainGridVG = findViewById(R.id.mainGrid);
+        getAllText(mainGridVG, mainGrid);
+        editor.putString("mainGrid", mainGrid.toString());
 
-        editor.putString("workerNameRow1", workerNameRow1.getText().toString());
-        editor.putString("workerNameRow2", workerNameRow2.getText().toString());
-        editor.putString("workerNameRow3", workerNameRow3.getText().toString());
-        editor.putString("workerNameRow4", workerNameRow4.getText().toString());
-        editor.putString("workerNameRow5", workerNameRow5.getText().toString());
-        editor.putString("workerDescRow1", workerDescRow1.getText().toString());
-        editor.putString("workerDescRow2", workerDescRow2.getText().toString());
-        editor.putString("workerDescRow3", workerDescRow3.getText().toString());
-        editor.putString("workerDescRow4", workerDescRow4.getText().toString());
-        editor.putString("workerDescRow5", workerDescRow5.getText().toString());
-        editor.putString("workerCntRow1", workerCntRow1.getText().toString());
-        editor.putString("workerCntRow2", workerCntRow2.getText().toString());
-        editor.putString("workerCntRow3", workerCntRow3.getText().toString());
-        editor.putString("workerCntRow4", workerCntRow4.getText().toString());
-        editor.putString("workerCntRow5", workerCntRow5.getText().toString());
+        StringBuilder equipForm = new StringBuilder();
+        ViewGroup equipFormVG = findViewById(R.id.equipForm);
+        getAllText(equipFormVG, equipForm);
+        editor.putString("equipForm", equipForm.toString());
+
+        StringBuilder mainGrid2 = new StringBuilder();
+        ViewGroup mainGrid2VG = findViewById(R.id.mainGrid2);
+        getAllText(mainGrid2VG, mainGrid2);
+        editor.putString("mainGrid2", mainGrid2.toString());
+
+        StringBuilder workerForm = new StringBuilder();
+        ViewGroup workerFormVG = findViewById(R.id.workerForm);
+        getAllText(workerFormVG, workerForm);
+        editor.putString("workerForm", workerForm.toString());
+
+        StringBuilder mainGrid3 = new StringBuilder();
+        ViewGroup mainGrid3VG = findViewById(R.id.mainGrid3);
+        getAllText(mainGrid3VG, mainGrid3);
+        editor.putString("mainGrid3", mainGrid3.toString());
+
         editor.apply();
+    }
+
+    private void controlAdditionalForm(AboutRowDialog.ChangeList type, int cnt) {
+        for (int i=0 ; i<cnt ; i++) {
+            onSelected(type);
+        }
     }
 
     @Override
@@ -261,38 +263,86 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
         SharedPreferences preferences = getSharedPreferences("todayWork", Activity.MODE_PRIVATE);
 
         workSiteET.setText(preferences.getString("workSiteET",""));
+        descET.setText(preferences.getString("descET", ""));
+        int equipCnt = Integer.parseInt(preferences.getString("addEquipCnt", "0"));
+        int workerCnt = Integer.parseInt(preferences.getString("addWorkerCnt", "0"));
 
-        equipNameRow1.setText(preferences.getString("equipNameRow1",""));
-        equipNameRow2.setText(preferences.getString("equipNameRow2",""));
-        equipNameRow3.setText(preferences.getString("equipNameRow3",""));
-        equipNameRow4.setText(preferences.getString("equipNameRow4",""));
-        equipNameRow5.setText(preferences.getString("equipNameRow5",""));
-        equipDescRow1.setText(preferences.getString("equipDescRow1",""));
-        equipDescRow2.setText(preferences.getString("equipDescRow2",""));
-        equipDescRow3.setText(preferences.getString("equipDescRow3",""));
-        equipDescRow4.setText(preferences.getString("equipDescRow4",""));
-        equipDescRow5.setText(preferences.getString("equipDescRow5",""));
-        equipCntRow1.setText(preferences.getString("equipCntRow1",""));
-        equipCntRow2.setText(preferences.getString("equipCntRow2",""));
-        equipCntRow3.setText(preferences.getString("equipCntRow3",""));
-        equipCntRow4.setText(preferences.getString("equipCntRow4",""));
-        equipCntRow5.setText(preferences.getString("equipCntRow5",""));
+        // 현재 추가된 row 가 남아있다면 모두 삭제
+        LinearLayout eForm = findViewById(R.id.equipForm);
+        int remainF = eForm.getChildCount();
+        controlAdditionalForm(AboutRowDialog.ChangeList.DEL_EQUIP, remainF);
 
-        workerNameRow1.setText(preferences.getString("workerNameRow1",""));
-        workerNameRow2.setText(preferences.getString("workerNameRow2",""));
-        workerNameRow3.setText(preferences.getString("workerNameRow3",""));
-        workerNameRow4.setText(preferences.getString("workerNameRow4",""));
-        workerNameRow5.setText(preferences.getString("workerNameRow5",""));
-        workerDescRow1.setText(preferences.getString("workerDescRow1",""));
-        workerDescRow2.setText(preferences.getString("workerDescRow2",""));
-        workerDescRow3.setText(preferences.getString("workerDescRow3",""));
-        workerDescRow4.setText(preferences.getString("workerDescRow4",""));
-        workerDescRow5.setText(preferences.getString("workerDescRow5",""));
-        workerCntRow1.setText(preferences.getString("workerCntRow1",""));
-        workerCntRow2.setText(preferences.getString("workerCntRow2",""));
-        workerCntRow3.setText(preferences.getString("workerCntRow3",""));
-        workerCntRow4.setText(preferences.getString("workerCntRow4",""));
-        workerCntRow5.setText(preferences.getString("workerCntRow5",""));
+        LinearLayout wForm = findViewById(R.id.workerForm);
+        int remainW = wForm.getChildCount();
+        controlAdditionalForm(AboutRowDialog.ChangeList.DEL_WORKER, remainW);
+
+        // addEquipCnt 만큼 레이아웃 추가
+        controlAdditionalForm(AboutRowDialog.ChangeList.ADD_EQUIP, equipCnt);
+        // addWorkerCnt 만틈 레이아웃 추가
+        controlAdditionalForm(AboutRowDialog.ChangeList.ADD_WORKER, workerCnt);
+
+        String[] mainGrid = preferences.getString("mainGrid","").split("[|]");
+        String[] equipForm = preferences.getString("equipForm","").split("[|]");
+        String[] mainGrid2 = preferences.getString("mainGrid2","").split("[|]");
+        String[] workerForm = preferences.getString("workerForm","").split("[|]");
+        String[] mainGrid3 = preferences.getString("mainGrid3","").split("[|]");
+
+        if (isNotEmptyArr(mainGrid)) {
+            ViewGroup mainGridVG = findViewById(R.id.mainGrid);
+            setAllText(mainGridVG, mainGrid);
+        }
+
+        if (isNotEmptyArr(equipForm)) {
+            ViewGroup equipFormVG = findViewById(R.id.equipForm);
+            setAllText(equipFormVG, equipForm);
+        }
+
+        if (isNotEmptyArr(mainGrid2)) {
+            ViewGroup mainGrid2VG = findViewById(R.id.mainGrid2);
+            setAllText(mainGrid2VG, mainGrid2);
+        }
+
+        if (isNotEmptyArr(workerForm)) {
+            ViewGroup workerFormVG = findViewById(R.id.workerForm);
+            setAllText(workerFormVG, workerForm);
+        }
+
+        if (isNotEmptyArr(mainGrid3)) {
+            ViewGroup mainGrid3VG = findViewById(R.id.mainGrid3);
+            setAllText(mainGrid3VG, mainGrid3);
+        }
+
+        preferences.edit().clear().apply();
+    }
+
+    private boolean isNotEmptyArr(String[] arr) {
+        if (arr == null || arr.length == 0)
+            return false;
+
+        if (arr.length == 1 && arr[0].equals("")) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void setAllText(ViewGroup vg, final String[] strArr) {
+        recoverIndex = 0;
+        goSetAllText(vg, strArr);
+    }
+
+    private void goSetAllText(ViewGroup vg, final String[] strArr) {
+        for (int i = 0, count = vg.getChildCount(); i < count; ++i) {
+            View view = vg.getChildAt(i);
+            if (view instanceof EditText) {
+                String value = strArr[recoverIndex++];
+                ((EditText)view).setText("@".equals(value) ? "" : value);
+            }
+
+            if (view instanceof ViewGroup && (((ViewGroup)view).getChildCount() > 0)) {
+                goSetAllText((ViewGroup) view, strArr);
+            }
+        }
     }
 
     private Bitmap getBitmapFromScrollView() {
@@ -312,7 +362,6 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
         try{
             View root = getWindow().getDecorView().getRootView();
             root.setDrawingCacheEnabled(true);
-//            Bitmap bitmap = Bitmap.createBitmap(root.getDrawingCache());
             Bitmap bitmap = getBitmapFromScrollView();
             root.setDrawingCacheEnabled(false);
 
@@ -338,7 +387,6 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
         intent.setType("image/*");
-        //intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
         intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(getApplicationContext(), "sa.devming.todaywork.fileprovider", imageFile));
 
         Intent chooser = Intent.createChooser(intent, "");
@@ -375,7 +423,6 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
         extras.putString("max_ad_content_rating", "G");
         AdRequest adRequest = new AdRequest.Builder()
                 .addNetworkExtrasBundle(AdMobAdapter.class, extras)
-//                .addTestDevice("71D328C14DFC957F175AEAA313DFC22A")
                 .build();
         mAdView.loadAd(adRequest);
     }
