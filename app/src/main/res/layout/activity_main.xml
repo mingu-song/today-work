@@ -11,46 +11,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="sa.devming.todaywork.MainActivity">
 
-    <LinearLayout
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-        <TextView
-            android:text="@string/workSite"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/workSite" />
-        <EditText
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="5"
-            android:maxLines="1"
-            android:inputType="text"
-            android:maxLength="50"
-            android:id="@+id/workSiteET" />
-
-        <ImageButton
-            android:id="@+id/editBT"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginRight="15dp"
-            android:background="@drawable/edit"
-            android:onClick="onClickEditBT" />
-        <ImageButton
-            android:id="@+id/shareBT"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/capture_share"
-            android:onClick="onClickShareBT" />
-    </LinearLayout>
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_below="@+id/title"
         android:layout_above="@+id/adView">
         <LinearLayout
             android:id="@+id/mainLayout"
@@ -58,9 +22,58 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <LinearLayout
+                android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:gravity="center">
+                <TextView
+                    android:text="@string/workSite"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:id="@+id/workSite" />
+                <EditText
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:maxLength="50"
+                    android:id="@+id/workSiteET" />
+
+                <ImageButton
+                    android:id="@+id/editBT"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/edit"
+                    android:onClick="onClickEditBT" />
+                <ImageButton
+                    android:id="@+id/shareBT"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/capture_share"
+                    android:onClick="onClickShareBT" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <ImageButton
+                    android:id="@+id/dateBT"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/date"
+                    android:layout_marginRight="3dp"
+                    android:onClick="onclickDateBT" />
+                <EditText
+                    android:id="@+id/dateET"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:layout_marginRight="10dp" />
                 <EditText
                     android:id="@+id/descET"
                     android:layout_width="match_parent"

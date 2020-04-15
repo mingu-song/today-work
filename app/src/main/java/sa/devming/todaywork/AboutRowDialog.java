@@ -4,10 +4,11 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
 import android.widget.ArrayAdapter;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 
 public class AboutRowDialog extends DialogFragment {
     public enum ChangeList { ADD_EQUIP, DEL_EQUIP, ADD_WORKER, DEL_WORKER, DEL_ALL}

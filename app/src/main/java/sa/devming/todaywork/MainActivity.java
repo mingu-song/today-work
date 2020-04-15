@@ -1,6 +1,7 @@
 package sa.devming.todaywork;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -10,19 +11,21 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.content.FileProvider;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.DialogFragment;
 
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
@@ -32,11 +35,12 @@ import com.google.android.gms.ads.MobileAds;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements AboutRowDialog.AboutRowDialogListener {
-    private EditText workSiteET, descET;
+    private EditText workSiteET, descET, dateET;
     private EditText equipCntRow1, equipCntRow2, equipCntRow3, equipCntRow4, equipCntRow5;
     private EditText workerCntRow1, workerCntRow2, workerCntRow3, workerCntRow4, workerCntRow5;
     private TextView equipCntSum, workerCntSum;
@@ -47,6 +51,11 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
 
     private int recoverIndex = 0;
 
+    private Calendar calendar = Calendar.getInstance();
+    private int selectYear, selectMonth, selectDay;
+    private String myFormat = "yyyy.MM.dd";
+    private SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.KOREA);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +63,17 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
 
         workSiteET = findViewById(R.id.workSiteET);
         descET = findViewById(R.id.descET);
+        dateET = findViewById(R.id.dateET);
+        dateET.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onclickDateBT(v);
+            }
+        });
+        selectYear = calendar.get(Calendar.YEAR);
+        selectMonth = calendar.get(Calendar.MONTH);
+        selectDay = calendar.get(Calendar.DAY_OF_MONTH);
+        dateET.setText(sdf.format(calendar.getTime()));
 
         //equip
         equipCntRow1 = findViewById(R.id.equipCntRow1);
@@ -104,6 +124,23 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
     public void onClickEditBT(View v) {
         DialogFragment dialog = new AboutRowDialog();
         dialog.show(getSupportFragmentManager(), "AboutRowDialog");
+    }
+
+    public void onclickDateBT(View v) {
+        DatePickerDialog mDatePicker = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, month);
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                dateET.setText(sdf.format(calendar.getTime()));
+
+                selectDay = dayOfMonth;
+                selectMonth = month;
+                selectYear = year;
+            }
+        }, selectYear, selectMonth, selectDay);
+        //mDatePicker.setTitle("Select date");
+        mDatePicker.show();
     }
 
     @Override
@@ -220,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
 
         editor.putString("workSiteET", workSiteET.getText().toString());
         editor.putString("descET", descET.getText().toString());
+        editor.putString("dateET", dateET.getText().toString());
         editor.putString("addEquipCnt", addEquipCnt+"");
         editor.putString("addWorkerCnt", addWorkerCnt+"");
 
@@ -264,6 +302,7 @@ public class MainActivity extends AppCompatActivity implements AboutRowDialog.Ab
 
         workSiteET.setText(preferences.getString("workSiteET",""));
         descET.setText(preferences.getString("descET", ""));
+        dateET.setText(preferences.getString("dateET", sdf.format(calendar.getTime())));
         int equipCnt = Integer.parseInt(preferences.getString("addEquipCnt", "0"));
         int workerCnt = Integer.parseInt(preferences.getString("addWorkerCnt", "0"));
 
